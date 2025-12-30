@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getBroadcastService } from '@/lib/broadcast/BroadcastService';
+import { getBroadcastService } from '@/lib/broadcast/instance';
 import { BroadcastMessage, BroadcastAPIResponse } from '@/types/broadcast';
 
 // In-memory broadcast queue (in production, use Redis or similar)

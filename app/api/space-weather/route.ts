@@ -5,9 +5,11 @@
  * Enhanced with broadcast integration for event detection
  */
 
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { fetchSpaceWeather } from '@/lib/data/nasaClient';
-import { getBroadcastService } from '@/lib/broadcast/BroadcastService';
+import { getBroadcastService } from '@/lib/broadcast/instance';
 import { EventDetector } from '@/lib/events/EventDetector';
 import type { SpaceWeatherData } from '@/types/nasa';
 
@@ -93,23 +95,38 @@ export async function GET() {
       });
     }
 
-    // Fetch fresh data from NASA API
-    console.log('Fetching fresh space weather data...');
-    const data = await fetchSpaceWeather();
-
-    // Detect significant changes (triggers broadcasts)
-    if (previousData) {
-      detectSignificantChanges(data, previousData);
-    }
-
-    // Run event detector for significant events
-    const events = eventDetector.analyzeData(data);
-    if (events.length > 0) {
-      console.log(`Detected ${events.length} space weather event(s)`);
-    }
-
-    // Update cache and previous data
-    previousData = cachedData;
+        // Fetch fresh data from NASA API
+        console.log('Fetching fresh space weather data...');
+        let data;
+        try {
+            data = await fetchSpaceWeather();
+        } catch (fetchError) {
+            console.error('Data fetch failed, using mock fallback:', fetchError);
+            const { getMockSpaceWeather } = await import('@/lib/demo/mockSpaceWeather');
+            data = getMockSpaceWeather();
+        }
+    
+        // Detect significant changes (triggers broadcasts)
+        if (previousData) {
+            try {
+                detectSignificantChanges(data, previousData);
+            } catch (e) {
+                console.error('Error detecting changes:', e);
+            }
+        }
+    
+        // Run event detector for significant events
+        let events: any[] = [];
+        try {
+            events = eventDetector.analyzeData(data);
+            if (events.length > 0) {
+                console.log(`Detected ${events.length} space weather event(s)`);
+            }
+        } catch (e) {
+            console.error('Error analyzing events:', e);
+        }
+    
+        // Update cache and previous data    previousData = cachedData;
     cachedData = data;
     cacheTimestamp = now;
 
@@ -158,19 +175,66 @@ export async function GET() {
 /**
  * POST /api/space-weather/simulate
  * Trigger simulated events for testing (development only)
+ * Updates the cached data so frontend polling detects the event
  */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { type } = body;
+    const now = new Date();
 
-    // Create simulated event based on type
+    // Initialize cachedData if null (using standard mock logic would be better but simple object works for now)
+    // Initialize cachedData if null (using standard mock logic would be better but simple object works for now)
+    if (!cachedData) {
+      // Fallback or wait for first fetch? Let's just create a base skeleton
+      cachedData = {
+        timestamp: now.toISOString(),
+        solar_wind: { speed: 450, density: 5, temperature: 100000, timestamp: now.toISOString() },
+        geomagnetic: { kp_index: 2, storm_active: false, storm_level: "None", timestamp: now.toISOString() },
+        flares: [],
+        data_source: 'demo'
+      };
+    }
+
+    // Capture non-null reference for spread operations
+    const currentCache = cachedData;
+
+    // Modify cachedData based on simulation type
     if (type === 'flare') {
+      const simulatedFlare = {
+        id: `SIM-FLR-${Date.now()}`,
+        flareClass: 'X5.0',
+        classType: 'X' as const,
+        magnitude: 5.0,
+        timestamp: now.toISOString(),
+        sourceRegion: 'AR3664',
+        peakTime: new Date(now.getTime() + 600000).toISOString()
+      };
+
+      cachedData = {
+        ...currentCache,
+        flares: [simulatedFlare, ...currentCache.flares],
+        timestamp: now.toISOString(),
+        data_source: 'demo'
+      };
+
       broadcastService.broadcastAlert(
         'SIMULATED X-CLASS FLARE',
         'Testing: X5.0 solar flare detected from AR3664. This is a simulation.',
       );
     } else if (type === 'storm') {
+      cachedData = {
+        ...currentCache,
+        geomagnetic: {
+          kp_index: 8,
+          storm_active: true,
+          storm_level: "Severe",
+          timestamp: now.toISOString()
+        },
+        timestamp: now.toISOString(),
+        data_source: 'demo'
+      };
+
       broadcastService.broadcastAlert(
         'SIMULATED GEOMAGNETIC STORM',
         'Testing: G4 severe geomagnetic storm in progress. Kp=8. This is a simulation.',
@@ -180,14 +244,29 @@ export async function POST(request: Request) {
         'Greetings, cosmic travelers. This is a test transmission from the void. The sun whispers secrets to those who listen...',
       );
     } else {
+      // Reset to nominal (using currentCache structure but resetting values)
+      cachedData = {
+        ...currentCache,
+        geomagnetic: {
+          kp_index: 2,
+          storm_active: false,
+          storm_level: "None",
+          timestamp: now.toISOString()
+        },
+        data_source: 'demo'
+      };
       broadcastService.broadcastSystem(
         'TEST TRANSMISSION',
         'This is a test broadcast from Cosmic Radio. All systems nominal.',
       );
     }
 
+    // Update timestamp to ensure cache doesn't look stale immediately (or maybe it should be fresh)
+    cacheTimestamp = Date.now();
+
     return NextResponse.json({ success: true, simulated: type });
   } catch (error) {
+    console.error("Simulation error", error);
     return NextResponse.json({ error: 'Simulation failed' }, { status: 500 });
   }
 }

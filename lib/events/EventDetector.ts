@@ -260,7 +260,7 @@ export class EventDetector {
       detectedAt: new Date(),
       description: `Multiple space weather events detected: ${eventTypes}`,
       data,
-      subEvents,
+      subEvents: [...subEvents], // Shallow copy to prevent circular reference
       intensity,
       announced: false,
     };

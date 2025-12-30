@@ -12,27 +12,36 @@ import { useAudioStore } from '@/store/audioStore';
 import { mapSpaceWeatherToAudio } from '@/lib/audio/sonification';
 import { SpaceWeatherData } from '@/types/nasa';
 
+// Hardcoded fallback to ensure UI never sticks
+const FALLBACK_DATA: SpaceWeatherData = {
+  timestamp: new Date().toISOString(),
+  solar_wind: { speed: 450, density: 5.5, temperature: 100000, timestamp: new Date().toISOString() },
+  geomagnetic: { kp_index: 3, storm_active: false, storm_level: "None", timestamp: new Date().toISOString() },
+  flares: [],
+  data_source: 'demo'
+};
+
 export interface UseSpaceWeatherOptions {
   /**
    * Polling interval in milliseconds (default: 60000 = 60 seconds)
    */
   pollInterval?: number;
-  
+
   /**
    * Whether to start polling automatically (default: true)
    */
   autoStart?: boolean;
-  
+
   /**
    * Use demo mode instead of live data (default: false)
    */
   demoMode?: boolean;
-  
+
   /**
    * Callback when data is successfully fetched
    */
   onDataUpdate?: (data: SpaceWeatherData) => void;
-  
+
   /**
    * Callback when an error occurs
    */
@@ -41,18 +50,6 @@ export interface UseSpaceWeatherOptions {
 
 /**
  * Hook to automatically poll space weather data and update audio parameters
- * 
- * @example
- * ```tsx
- * function MyComponent() {
- *   const { data, isLoading, error, refetch } = useSpaceWeatherPolling({
- *     pollInterval: 60000,
- *     demoMode: false
- *   });
- * 
- *   return <div>Kp Index: {data?.geomagnetic.kp_index}</div>;
- * }
- * ```
  */
 export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
   const {
@@ -68,6 +65,7 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
     spaceWeatherData,
     isLoading,
     error,
+    isDemoMode, // Get current mode
     updateSpaceWeatherData,
     updateAudioParams,
     setLoading,
@@ -75,79 +73,92 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
     setDemoMode,
   } = useAudioStore();
 
-  // Refs for cleanup and preventing stale closures
+  // ... refs ...
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
   const retryCountRef = useRef(0);
-  const MAX_RETRIES = 3;
+  const MAX_RETRIES = 2;
 
   /**
    * Fetch space weather data from API
    */
   const fetchData = useCallback(async () => {
-    if (!isMountedRef.current) return;
+    // If we are in specific demo mode (Mars, Carrington, etc) set by other components, 
+    // we pause polling to avoid overwriting their injected data.
+    // Unless the hook itself was instantiated with demoMode=true (legacy behavior)
+    if (isDemoMode && !demoMode) {
+      console.log('[useSpaceWeatherPolling] Polling paused due to active Simulation/Demo Mode');
+      return;
+    }
 
     try {
       setLoading(true);
       setError(null);
 
-      const url = demoMode 
-        ? '/api/space-weather?demo=true' 
+      const url = (demoMode || isDemoMode)
+        ? '/api/space-weather?demo=true'
         : '/api/space-weather';
 
-      console.log(`Fetching space weather data from ${url}...`);
-      
-      const response = await fetch(url);
+      console.log(`[useSpaceWeatherPolling] Fetching from: ${url}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // Client-side timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        // Revert to API
+        const data: SpaceWeatherData = await response.json();
+
+        // Even if unmounted, we log. But only update state if mounted (mostly)
+        // CRITICAL FIX: Always update store, even if unmounted. Store is global.
+        console.log('[useSpaceWeatherPolling] Data received');
+        updateSpaceWeatherData(data);
+        updateAudioParams(mapSpaceWeatherToAudio(data));
+        retryCountRef.current = 0;
+
+        if (isMountedRef.current) {
+          onDataUpdate?.(data);
+        }
+
+      } catch (fetchErr) {
+        clearTimeout(timeoutId);
+        throw fetchErr;
       }
 
-      const data: SpaceWeatherData = await response.json();
-
-      if (!isMountedRef.current) return;
-
-      // Update store with new data
-      updateSpaceWeatherData(data);
-
-      // Calculate audio parameters from space weather data
-      const audioParams = mapSpaceWeatherToAudio(data);
-      updateAudioParams(audioParams);
-
-      // Reset retry counter on success
-      retryCountRef.current = 0;
-
-      // Call success callback
-      onDataUpdate?.(data);
-
-      console.log('Space weather data fetched successfully:', {
-        timestamp: data.timestamp,
-        source: data.data_source,
-        solarWind: data.solar_wind.speed,
-        kpIndex: data.geomagnetic.kp_index,
-      });
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error occurred');
-      console.error('Failed to fetch space weather data:', error);
+      console.error('[useSpaceWeatherPolling] Failed to fetch:', error);
 
-      if (!isMountedRef.current) return;
-
-      // Implement retry logic
+      // Retry Logic & Fallback
       retryCountRef.current++;
-      
+
       if (retryCountRef.current >= MAX_RETRIES) {
-        setError(`Failed to fetch data after ${MAX_RETRIES} attempts: ${error.message}`);
-        onError?.(error);
-        // Stop polling on max retries
-        stopPolling();
+        console.warn('[useSpaceWeatherPolling] Max retries reached. Using CLIENT FALLBACK.');
+
+        // CLIENT-SIDE FALLBACK (Bypassing API)
+        if (isMountedRef.current) {
+          updateSpaceWeatherData(FALLBACK_DATA);
+          updateAudioParams(mapSpaceWeatherToAudio(FALLBACK_DATA));
+          setError(null);
+          setDemoMode(true);
+          retryCountRef.current = 0;
+        }
       } else {
-        setError(`Fetch error (attempt ${retryCountRef.current}/${MAX_RETRIES}): ${error.message}`);
-        console.log(`Retrying... (${retryCountRef.current}/${MAX_RETRIES})`);
+        if (isMountedRef.current) {
+          setError(`Signal Lost. Retrying... (${retryCountRef.current}/${MAX_RETRIES})`);
+        }
       }
     } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
+      // ALWAYS clear loading, even if unmounted. 
+      // Since store is global, we must reset the flag to prevent other components from seeing stuck loading state.
+      setLoading(false);
     }
   }, [
     demoMode,
@@ -157,21 +168,20 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
     setError,
     onDataUpdate,
     onError,
+    setDemoMode,
+    isDemoMode // Added dependency
   ]);
 
   /**
    * Start polling
    */
   const startPolling = useCallback(() => {
-    // Clear existing interval if any
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
-    // Fetch immediately
     fetchData();
 
-    // Set up polling interval
     intervalRef.current = setInterval(() => {
       fetchData();
     }, pollInterval);
@@ -191,16 +201,14 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
   }, []);
 
   /**
-   * Manually trigger a fetch (doesn't reset polling timer)
+   * Manually trigger a fetch
    */
   const refetch = useCallback(() => {
     fetchData();
   }, [fetchData]);
 
-  // Set demo mode in store
-  useEffect(() => {
-    setDemoMode(demoMode);
-  }, [demoMode, setDemoMode]);
+  // Removed useEffect that forced setDemoMode(demoMode) to allow global store to manage simulation state.
+  // External components (SourceSelector, ArchiveUnlock) now control entering/exiting demo mode.
 
   // Auto-start polling on mount
   useEffect(() => {
@@ -215,32 +223,18 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
   }, [autoStart, startPolling, stopPolling]);
 
   return {
-    /** Current space weather data */
     data: spaceWeatherData,
-    
-    /** Whether data is currently being fetched */
     isLoading,
-    
-    /** Error message if fetch failed */
     error,
-    
-    /** Manually trigger a data fetch */
     refetch,
-    
-    /** Start polling (if stopped) */
     startPolling,
-    
-    /** Stop polling */
     stopPolling,
-    
-    /** Current retry count */
     retryCount: retryCountRef.current,
   };
 }
 
 /**
  * Simple hook to just get the current space weather data
- * without polling functionality
  */
 export function useSpaceWeatherData() {
   const { spaceWeatherData, isLoading, error } = useAudioStore();

@@ -15,7 +15,10 @@ export interface AudioParameters {
   bpm?: number;
   distortion?: number;
   filterFrequency?: number;
+  filterFreq?: number; // Alias for compatibility
   volume?: number;
+  volumeBoost?: number;
+  intensity?: number; // 0-1 scale for mix density
   bassNote?: string;
   shimmerNote?: string;
 }

@@ -424,7 +424,3 @@ export class BroadcastService {
     }
 }
 
-// Export singleton getter
-export const getBroadcastService = (config?: Partial<BroadcastConfig>): BroadcastService => {
-    return BroadcastService.getInstance(config);
-};

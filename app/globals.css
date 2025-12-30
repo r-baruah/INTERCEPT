@@ -2,449 +2,336 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   INTERCEPT - Design System
+   "Invisible Tech. If the user notices the interface, we have failed."
+   ============================================================================ */
+
 :root {
-    --font-inter: 'Inter', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-
-    /* SpaceX / Aerospace Palette */
-    --color-bg: #000000;
-    --color-panel: #0a0a0a;
-    --color-border: #1a1a1a;
-    --color-border-hover: #333333;
-    --color-text-primary: #ffffff;
-    --color-text-secondary: #9ca3af;
-    --color-text-muted: #6b7280;
-    --color-accent: #ffffff;
-    --color-danger: #ef4444;
-    --color-warning: #f59e0b;
-    --color-success: #10b981;
-    --color-info: #3b82f6;
-
-    /* Cosmic Colors */
-    --color-solar: #fbbf24;
-    --color-aurora-green: #4ade80;
-    --color-aurora-blue: #60a5fa;
-    --color-aurora-purple: #a78bfa;
-    --color-nebula: #818cf8;
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', monospace;
+  
+  /* The Void */
+  --color-void: #000000;
+  --color-void-soft: #0a0a0a;
+  
+  /* Signal Colors - Enhanced */
+  --color-signal-locked: #ffffff;
+  --color-signal-searching: #a1a1aa; /* Upgraded from 3f3f46 */
+  
+  /* Storm Spectrum (Blue → Amber) */
+  --color-calm: hsl(200, 70%, 50%);
+  --color-storm: hsl(30, 90%, 50%);
+  
+  /* Status - Brighter for visibility */
+  --color-nominal: #34d399;   /* emerald-400 */
+  --color-warning: #fbbf24;   /* amber-400 */
+  --color-critical: #f87171;  /* red-400 */
+  
+  /* Text Hierarchy - ENHANCED for visibility */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a1a1aa; /* zinc-400 - was zinc-600 */
+  --color-text-muted: #71717a;     /* zinc-500 - was zinc-700 */
 }
 
-/* Base Styles */
-body {
-    @apply bg-black text-white font-sans antialiased;
-    background-color: var(--color-bg);
+/* ============================================================================
+   Base Reset
+   ============================================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* ===== SpaceX-style Panels ===== */
-.sx-panel {
-    @apply bg-[#0a0a0a] border border-[#1a1a1a];
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-    transition: border-color 0.2s ease;
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-void);
+  color: var(--color-text-primary);
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.sx-panel:hover {
-    border-color: var(--color-border-hover);
+/* ============================================================================
+   Typography - Stark. Functional. Beautiful.
+   ============================================================================ */
+
+.font-mono {
+  font-family: var(--font-mono);
 }
 
-.sx-panel-header {
-    @apply px-4 py-3 border-b border-[#1a1a1a] flex items-center justify-between;
+/* Data Display - Fighter Jet HUD Style */
+.data-value {
+  @apply font-mono tracking-tight;
+  text-shadow: 0 0 20px currentColor;
 }
 
-.sx-panel-title {
-    @apply text-xs font-bold uppercase tracking-[0.2em] text-[#6b7280];
+.shadow-glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
-/* ===== Data Display ===== */
-.sx-value-large {
-    @apply text-3xl font-light tracking-tight;
+.data-label {
+  @apply font-mono text-[10px] tracking-[0.3em] uppercase;
+  color: var(--color-text-muted);
 }
 
-.sx-label {
-    @apply text-[10px] text-[#6b7280] uppercase tracking-wider font-semibold;
+/* ============================================================================
+   The Ring - Glow Effects
+   ============================================================================ */
+
+.ring-glow-calm {
+  box-shadow: 
+    0 0 60px hsla(200, 70%, 50%, 0.3),
+    0 0 120px hsla(200, 70%, 50%, 0.1);
 }
 
-.sx-data-row {
-    @apply flex justify-between items-center py-2 border-b border-[#1a1a1a] last:border-0;
+.ring-glow-storm {
+  box-shadow: 
+    0 0 60px hsla(30, 90%, 50%, 0.4),
+    0 0 120px hsla(30, 90%, 50%, 0.2);
 }
 
-/* ===== Button Styles ===== */
-.sx-button {
-    @apply px-6 py-2 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+/* ============================================================================
+   Animations - Minimal, Purposeful
+   ============================================================================ */
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
 }
 
-.sx-button:focus-visible {
-    @apply outline-none ring-2 ring-white ring-offset-2 ring-offset-black;
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
-.sx-button-outline {
-    @apply px-6 py-2 border border-white/20 text-white text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-all;
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.sx-button-outline:focus-visible {
-    @apply outline-none ring-2 ring-white/50 ring-offset-2 ring-offset-black;
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+  51% { opacity: 1; }
+  52% { opacity: 0.6; }
+  53% { opacity: 1; }
 }
 
-.sx-button-danger {
-    @apply px-6 py-2 border border-red-500/50 text-red-500 text-xs font-bold uppercase tracking-widest hover:bg-red-950/30 transition-all;
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
 }
 
-.sx-button-danger:focus-visible {
-    @apply outline-none ring-2 ring-red-500/50 ring-offset-2 ring-offset-black;
-}
-
-/* ===== Status Indicators ===== */
-.status-dot {
-    @apply w-1.5 h-1.5 rounded-full transition-colors;
-}
-
-.status-dot.active {
-    @apply bg-green-500;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
-}
-
-.status-dot.warning {
-    @apply bg-yellow-500;
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
-}
-
-.status-dot.danger {
-    @apply bg-red-500;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-}
-
-/* ===== Glow Effects ===== */
-.glow-white {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-}
-
-.glow-green {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
-}
-
-.glow-red {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-}
-
-.glow-solar {
-    box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
-}
-
-.text-glow {
-    text-shadow: 0 0 10px currentColor;
-}
-
-.text-glow-strong {
-    text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
-}
-
-/* ===== Scrollbar ===== */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: #000000;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #333333;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #555555;
-}
-
-/* ===== Typography ===== */
-h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight;
-}
-
-.font-mono-sx {
-    font-family: var(--font-mono);
-    letter-spacing: -0.05em;
-}
-
-/* ===== Grid Overlay ===== */
-.bg-grid-sx {
-    background-image:
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-}
-
-/* ===== Animations ===== */
-@keyframes pulse-glow {
-    0%, 100% {
-        opacity: 1;
-        box-shadow: 0 0 10px currentColor;
-    }
-    50% {
-        opacity: 0.7;
-        box-shadow: 0 0 20px currentColor;
-    }
-}
-
-@keyframes scan-line {
-    0% {
-        transform: translateY(-100%);
-    }
-    100% {
-        transform: translateY(100vh);
-    }
-}
-
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-@keyframes aurora {
-    0% {
-        opacity: 0.3;
-        transform: translateX(-100%) skewX(-15deg);
-    }
-    50% {
-        opacity: 0.6;
-    }
-    100% {
-        opacity: 0.3;
-        transform: translateX(100%) skewX(-15deg);
-    }
-}
-
-@keyframes twinkle {
-    0%, 100% {
-        opacity: 0.2;
-    }
-    50% {
-        opacity: 1;
-    }
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes radio-wave {
-    0% {
-        transform: scale(1);
-        opacity: 0.6;
-    }
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
-}
-
-.animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-float {
-    animation: float 3s ease-in-out infinite;
-}
-
-.animate-aurora {
-    animation: aurora 8s linear infinite;
-}
-
-.animate-twinkle {
-    animation: twinkle 3s ease-in-out infinite;
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
 }
 
 .animate-slide-in {
-    animation: slideIn 0.3s ease-out;
+  animation: slide-in 0.3s ease-out;
 }
 
-.animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
+.animate-flicker {
+  animation: flicker 0.15s ease-in-out;
 }
 
-.animate-radio-wave {
-    animation: radio-wave 2s ease-out infinite;
+/* ============================================================================
+   Tuner - Heavy, Precise Instrument Feel
+   ============================================================================ */
+
+.tuner-track {
+  @apply relative h-1 bg-zinc-900 rounded-full;
 }
 
-/* ===== Aurora Effect Overlay ===== */
-.aurora-overlay {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
+.tuner-knob {
+  @apply absolute top-1/2 -translate-y-1/2 -translate-x-1/2;
+  @apply w-6 h-12 rounded-sm cursor-ew-resize;
+  background: linear-gradient(180deg, #666 0%, #333 100%);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  transition: transform 0.1s ease, box-shadow 0.3s ease;
 }
 
-.aurora-overlay::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(74, 222, 128, 0.1),
-        rgba(96, 165, 250, 0.1),
-        rgba(167, 139, 250, 0.1),
-        transparent
-    );
-    animation: aurora 10s linear infinite;
+.tuner-knob.locked {
+  background: linear-gradient(180deg, #fff 0%, #ccc 100%);
+  box-shadow: 0 0 20px rgba(255,255,255,0.5), 0 4px 8px rgba(0,0,0,0.5);
 }
 
-/* ===== Cosmic Background Effects ===== */
-.cosmic-bg {
-    position: relative;
-    background: radial-gradient(ellipse at center, #0a0a1a 0%, #000000 70%);
+.tuner-knob:active {
+  transform: translateY(-50%) translateX(-50%) scale(1.1);
 }
 
-.cosmic-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(2px 2px at 20px 30px, #ffffff20, transparent),
-                      radial-gradient(2px 2px at 40px 70px, #ffffff15, transparent),
-                      radial-gradient(1px 1px at 90px 40px, #ffffff20, transparent),
-                      radial-gradient(2px 2px at 130px 80px, #ffffff15, transparent),
-                      radial-gradient(1px 1px at 160px 120px, #ffffff10, transparent);
-    background-size: 200px 200px;
-    animation: twinkle 4s ease-in-out infinite;
+/* ============================================================================
+   Signal Strength Meter
+   ============================================================================ */
+
+.signal-bar {
+  @apply flex-1 rounded-sm transition-all duration-150;
+  background-color: var(--color-void-soft);
 }
 
-/* ===== Loading Skeleton ===== */
-.skeleton {
-    background: linear-gradient(
-        90deg,
-        #1a1a1a 0%,
-        #2a2a2a 50%,
-        #1a1a1a 100%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+.signal-bar.active {
+  background-color: var(--color-nominal);
 }
 
-@keyframes skeleton-shimmer {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
+.signal-bar.warning {
+  background-color: var(--color-warning);
 }
 
-/* ===== Accessibility ===== */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+.signal-bar.weak {
+  background-color: var(--color-critical);
 }
 
-/* Focus visible for keyboard navigation */
-:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.5);
-    outline-offset: 2px;
+/* ============================================================================
+   Sentry Message Card
+   ============================================================================ */
+
+.sentry-message {
+  @apply px-6 py-3 backdrop-blur-sm border rounded-sm;
+  @apply font-mono text-sm tracking-wider uppercase;
 }
 
-/* Screen reader only */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
+.sentry-message.info {
+  @apply bg-white/5 border-white/20 text-white/80;
 }
 
-/* ===== Custom Scrollbar Class ===== */
+.sentry-message.warning {
+  @apply bg-amber-500/10 border-amber-500/50 text-amber-400;
+}
+
+.sentry-message.critical {
+  @apply bg-red-500/10 border-red-500/50 text-red-400;
+}
+
+/* ============================================================================
+   Logbook Panel
+   ============================================================================ */
+
+.logbook-panel {
+  @apply fixed inset-y-0 right-0 w-full max-w-md z-40;
+  @apply bg-black/95 border-l border-zinc-800 overflow-hidden;
+}
+
+.logbook-entry {
+  @apply bg-zinc-900/50 border border-zinc-800 p-4 rounded-sm;
+  @apply hover:border-zinc-700 transition-colors;
+}
+
+/* ============================================================================
+   Button Styles - Instrument Controls
+   ============================================================================ */
+
+.btn-acquire {
+  @apply px-6 py-3 font-mono text-sm tracking-widest uppercase;
+  @apply transition-all duration-300;
+}
+
+.btn-acquire:disabled {
+  @apply bg-zinc-900 text-zinc-600 cursor-not-allowed;
+}
+
+.btn-acquire:not(:disabled) {
+  @apply bg-white/10 text-white border border-white/30;
+  @apply hover:bg-white/20;
+}
+
+.btn-acquire.active {
+  @apply bg-white text-black;
+}
+
+/* ============================================================================
+   Scrollbar - Invisible or Minimal
+   ============================================================================ */
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
+  width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 2px;
+  background: #333;
+  border-radius: 2px;
 }
 
-/* ===== Interactive Hover States ===== */
-.interactive-panel {
-    @apply transition-all duration-200;
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #444;
 }
 
-.interactive-panel:hover {
-    @apply border-zinc-700;
-    transform: translateY(-1px);
+/* ============================================================================
+   Utility Classes
+   ============================================================================ */
+
+.glass {
+  @apply backdrop-blur-sm bg-white/5 border border-white/10;
 }
 
-/* ===== Data Visualization ===== */
-.viz-bar {
-    @apply bg-white/20 rounded-sm transition-all duration-300;
+.text-gradient {
+  background: linear-gradient(180deg, #fff 0%, #888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.viz-bar.active {
-    @apply bg-white;
+/* Selection */
+::selection {
+  background-color: white;
+  color: black;
 }
 
-.viz-bar.warning {
-    @apply bg-yellow-500;
+/* Focus States - Subtle */
+:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2px;
 }
 
-.viz-bar.danger {
-    @apply bg-red-500;
+/* ============================================================================
+   Noise Texture Overlay
+   ============================================================================ */
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  mix-blend-mode: overlay;
 }
 
-/* ===== Signal Wave Effect ===== */
-.signal-wave {
-    position: relative;
-}
+/* ============================================================================
+   Responsive Adjustments
+   ============================================================================ */
 
-.signal-wave::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    border: 1px solid currentColor;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    animation: radio-wave 2s ease-out infinite;
-}
-
-/* ===== Panel Hover Glow ===== */
-.panel-hover-glow {
-    transition: box-shadow 0.3s ease;
-}
-
-.panel-hover-glow:hover {
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+@media (max-width: 640px) {
+  .data-value {
+    @apply text-2xl;
+  }
+  
+  .data-label {
+    @apply text-[8px] tracking-[0.2em];
+  }
 }

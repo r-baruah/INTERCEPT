@@ -18,31 +18,40 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
   themeColor: '#000000',
   colorScheme: 'dark',
 };
 
 export const metadata: Metadata = {
-  title: 'Cosmic Radio | Interstellar Signal Processing',
-  description: 'Experience space weather through sound. Real-time sonification of NASA solar wind, magnetospheric data, and AI-powered cosmic broadcasts.',
-  keywords: ['space weather', 'sonification', 'NASA', 'ambient music', 'solar wind', 'radio astronomy', 'DONKI', 'aurora', 'geomagnetic storm'],
-  authors: [{ name: 'Cosmic Radio Team' }],
+  title: 'INTERCEPT | Listen to the Sun',
+  description: 'Real-time heliospheric receiver. Transform live NASA telemetry into an immersive, procedural audio-visual broadcast. The universe is speaking. Are you listening?',
+  keywords: [
+    'space weather',
+    'sonification',
+    'NASA DONKI',
+    'solar wind',
+    'geomagnetic storm',
+    'real-time',
+    'heliospheric',
+    'ambient',
+    'audio visualization'
+  ],
+  authors: [{ name: 'INTERCEPT Team' }],
   icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
     apple: '/favicon.svg',
   },
   openGraph: {
-    title: 'Cosmic Radio | Interstellar Signal Processing',
-    description: 'Experience space weather through sound. Real-time sonification of NASA data with AI-powered cosmic broadcasts.',
+    title: 'INTERCEPT | Listen to the Sun',
+    description: 'Real-time heliospheric receiver. The universe is speaking.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cosmic Radio',
-    description: 'Experience space weather through sound',
+    title: 'INTERCEPT',
+    description: 'Listen to the Sun. Real-time heliospheric receiver.',
   },
   robots: {
     index: true,
@@ -57,13 +66,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="bg-black text-white font-sans antialiased overflow-hidden selection:bg-white selection:text-black">
-        {/* Subtle grid overlay for technical feel */}
-        <div className="fixed inset-0 z-0 bg-grid-sx opacity-20 pointer-events-none" />
+      <body className="bg-black text-white font-sans antialiased overflow-hidden">
+        {/* The Void - Pure OLED Black */}
+        {children}
 
-        <div className="relative z-10 w-full h-full">
-          {children}
-        </div>
+        {/* Subtle noise texture for screen texture */}
+        <div className="noise-overlay" aria-hidden="true" />
       </body>
     </html>
   );

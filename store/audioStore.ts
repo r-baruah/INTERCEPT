@@ -1,20 +1,21 @@
 /**
- * Audio Store - Zustand Global State Management
+ * Audio Store - Zustand Global State Management v2.0
  * 
- * Centralized state management for Cosmic Radio application.
- * Manages audio engine state, space weather data, and event detection.
+ * Centralized state management for the Heliospheric Audio Engine.
+ * Manages audio engine state, space weather data, and telemetry-to-audio flow.
  */
 
 import { create } from 'zustand';
 import { SpaceWeatherData } from '@/types/nasa';
 import { AudioEngine } from '@/lib/audio/AudioEngine';
+import { mapSpaceWeatherToAudio, calculateDangerLevel, getDangerLabel } from '@/lib/audio/sonification';
 
 export interface AudioParameters {
-  bpm: number;
-  distortion: number;
-  filterFreq: number;
-  volumeBoost: number;
-  intensity: number;
+  bpm: number;           // Solar wind speed (passed to LFO rate internally)
+  distortion: number;    // Kp-based interference (0-1)
+  filterFreq: number;    // Density-based filter cutoff
+  volumeBoost: number;   // Flare volume boost (dB)
+  intensity: number;     // Overall intensity (0-1)
 }
 
 export interface AudioState {
@@ -22,28 +23,41 @@ export interface AudioState {
   audioEngine: AudioEngine | null;
   isPlaying: boolean;
   isInitialized: boolean;
-  
+
   // Space Weather Data
   spaceWeatherData: SpaceWeatherData | null;
   lastUpdate: Date | null;
   isLoading: boolean;
   error: string | null;
-  
+
   // Audio Parameters (derived from space weather)
   audioParams: AudioParameters | null;
-  
+
+  // Danger Level (0-4)
+  dangerLevel: number;
+  dangerLabel: string;
+
   // Mode
   isDemoMode: boolean;
-  
+  isMarsMode: boolean; // True when viewing Mars telemetry
+
+  // Signal Lock State (from Tuner)
+  signalLock: number; // 0 = unlocked, 1 = locked
+
   // Actions
   initializeAudioEngine: () => Promise<void>;
   setAudioEngine: (engine: AudioEngine) => void;
   togglePlayback: () => Promise<void>;
   updateSpaceWeatherData: (data: SpaceWeatherData) => void;
+  overrideSpaceWeatherData: (data: SpaceWeatherData) => void;
   updateAudioParams: (params: AudioParameters) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setDemoMode: (enabled: boolean) => void;
+  setSignalLock: (quality: number) => void;
+  setKpIndex: (kpIndex: number) => void;
+  setWindSpeed: (speed: number) => void;
+  setMarsMode: (enabled: boolean) => void;
   reset: () => void;
 }
 
@@ -56,7 +70,11 @@ const initialState = {
   isLoading: false,
   error: null,
   audioParams: null,
+  dangerLevel: 0,
+  dangerLabel: 'NOMINAL',
   isDemoMode: false,
+  isMarsMode: false,
+  signalLock: 0,
 };
 
 export const useAudioStore = create<AudioState>((set, get) => ({
@@ -69,7 +87,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   initializeAudioEngine: async () => {
     try {
       const { audioEngine, isInitialized } = get();
-      
+
       if (isInitialized && audioEngine) {
         console.log('AudioEngine already initialized');
         return;
@@ -77,14 +95,14 @@ export const useAudioStore = create<AudioState>((set, get) => ({
 
       const engine = AudioEngine.getInstance();
       await engine.initialize();
-      
+
       set({
         audioEngine: engine,
         isInitialized: true,
         error: null,
       });
 
-      console.log('AudioEngine initialized successfully');
+      console.log('✅ AudioStore: Heliospheric Audio Engine initialized');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize audio engine';
       console.error('AudioEngine initialization error:', error);
@@ -94,8 +112,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   },
 
   /**
-   * Set the audio engine instance
-   * Used when engine is created externally
+   * Set the audio engine instance (external creation)
    */
   setAudioEngine: (engine: AudioEngine) => {
     set({
@@ -121,11 +138,11 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       if (isPlaying) {
         audioEngine.stop();
         set({ isPlaying: false });
-        console.log('Playback stopped');
+        console.log('⏹️ Playback stopped');
       } else {
         audioEngine.play();
         set({ isPlaying: true, error: null });
-        console.log('Playback started');
+        console.log('▶️ Playback started');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Playback error';
@@ -135,40 +152,152 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   },
 
   /**
-   * Update space weather data and timestamp
+   * Update space weather data (from API polling)
+   * Automatically derives audio parameters
    */
   updateSpaceWeatherData: (data: SpaceWeatherData) => {
+    const audioParams = mapSpaceWeatherToAudio(data);
+    const dangerLevel = calculateDangerLevel(data);
+    const dangerLabel = getDangerLabel(dangerLevel);
+
     set({
       spaceWeatherData: data,
       lastUpdate: new Date(),
       error: null,
+      audioParams: {
+        bpm: audioParams.bpm,
+        distortion: audioParams.distortion,
+        filterFreq: audioParams.filterFrequency,
+        volumeBoost: audioParams.volumeBoost,
+        intensity: audioParams.intensity,
+      },
+      dangerLevel,
+      dangerLabel,
     });
-    console.log('Space weather data updated:', data.timestamp);
+
+    // Apply to audio engine
+    const { audioEngine, isInitialized, isPlaying } = get();
+    if (audioEngine && isInitialized && isPlaying) {
+      audioEngine.updateParameters({
+        bpm: audioParams.bpm,
+        distortion: audioParams.distortion,
+        filterFrequency: audioParams.filterFrequency,
+        volumeBoost: audioParams.volumeBoost,
+        intensity: audioParams.intensity,
+      });
+    }
+
+    console.log(`📡 Telemetry updated: Wind=${data.solar_wind.speed}km/s, Kp=${data.geomagnetic.kp_index}, Danger=${dangerLabel}`);
   },
 
   /**
-   * Update audio parameters (from sonification)
+   * Override space weather data (Simulation Mode)
+   * Immediately applies to audio engine
+   */
+  overrideSpaceWeatherData: (data: SpaceWeatherData) => {
+    const audioParams = mapSpaceWeatherToAudio(data);
+    const dangerLevel = calculateDangerLevel(data);
+    const dangerLabel = getDangerLabel(dangerLevel);
+
+    set({
+      spaceWeatherData: data,
+      lastUpdate: new Date(),
+      error: null,
+      audioParams: {
+        bpm: audioParams.bpm,
+        distortion: audioParams.distortion,
+        filterFreq: audioParams.filterFrequency,
+        volumeBoost: audioParams.volumeBoost,
+        intensity: audioParams.intensity,
+      },
+      dangerLevel,
+      dangerLabel,
+    });
+
+    // FORCE apply to audio engine (even during simulation)
+    const { audioEngine, isInitialized } = get();
+    if (audioEngine && isInitialized) {
+      audioEngine.updateParameters({
+        bpm: audioParams.bpm,
+        distortion: audioParams.distortion,
+        filterFrequency: audioParams.filterFrequency,
+        volumeBoost: audioParams.volumeBoost,
+        intensity: audioParams.intensity,
+      });
+    }
+
+    console.log(`🔧 SIMULATION: Wind=${data.solar_wind.speed}km/s, Kp=${data.geomagnetic.kp_index}, Danger=${dangerLabel}`);
+  },
+
+  /**
+   * Update audio parameters directly
    */
   updateAudioParams: (params: AudioParameters) => {
     set({ audioParams: params });
-    
+
     const { audioEngine, isInitialized } = get();
-    
-    // Apply parameters to audio engine if available
+
     if (audioEngine && isInitialized) {
       try {
-        // Use AudioEngine's updateParameters method
         audioEngine.updateParameters({
           bpm: params.bpm,
           distortion: params.distortion,
           filterFrequency: params.filterFreq,
-          volume: params.volumeBoost, // Volume boost in dB
+          volumeBoost: params.volumeBoost,
+          intensity: params.intensity,
         });
-        
-        console.log('Audio parameters applied:', params);
+
+        console.log('🎛️ Audio parameters applied:', params);
       } catch (error) {
         console.error('Failed to apply audio parameters:', error);
       }
+    }
+  },
+
+  /**
+   * Set signal lock quality (from Tuner)
+   * Controls atmosphere noise volume
+   */
+  setSignalLock: (quality: number) => {
+    set({ signalLock: quality });
+
+    const { audioEngine, isInitialized } = get();
+    if (audioEngine && isInitialized) {
+      audioEngine.setSignalLock(quality);
+    }
+  },
+
+  /**
+   * Direct Kp index update (for Simulation Panel)
+   * Immediately applies interference effects
+   */
+  setKpIndex: (kpIndex: number) => {
+    const { audioEngine, isInitialized, spaceWeatherData } = get();
+
+    if (audioEngine && isInitialized) {
+      audioEngine.setKpIndex(kpIndex);
+
+      // Update danger level
+      if (spaceWeatherData) {
+        const updatedData = {
+          ...spaceWeatherData,
+          geomagnetic: { ...spaceWeatherData.geomagnetic, kp_index: kpIndex }
+        };
+        const dangerLevel = calculateDangerLevel(updatedData);
+        set({ dangerLevel, dangerLabel: getDangerLabel(dangerLevel) });
+      }
+    }
+  },
+
+  /**
+   * Direct wind speed update (for Simulation Panel)
+   * Immediately adjusts LFO rate
+   */
+  setWindSpeed: (speed: number) => {
+    const { audioEngine, isInitialized } = get();
+
+    if (audioEngine && isInitialized) {
+      audioEngine.setWindSpeed(speed);
     }
   },
 
@@ -191,17 +320,23 @@ export const useAudioStore = create<AudioState>((set, get) => ({
    */
   setDemoMode: (enabled: boolean) => {
     set({ isDemoMode: enabled });
-    console.log(`Demo mode ${enabled ? 'enabled' : 'disabled'}`);
+    console.log(`🎮 Demo mode ${enabled ? 'enabled' : 'disabled'}`);
+  },
+
+  /**
+   * Toggle Mars mode (for theme changes)
+   */
+  setMarsMode: (enabled: boolean) => {
+    set({ isMarsMode: enabled });
+    console.log(`🔴 Mars mode ${enabled ? 'enabled' : 'disabled'}`);
   },
 
   /**
    * Reset store to initial state
-   * Note: Does not destroy audio engine (must be done separately)
    */
   reset: () => {
     const { audioEngine } = get();
-    
-    // Stop playback if active
+
     if (audioEngine) {
       try {
         audioEngine.stop();
@@ -209,14 +344,14 @@ export const useAudioStore = create<AudioState>((set, get) => ({
         console.error('Error stopping audio during reset:', error);
       }
     }
-    
+
     set({
       ...initialState,
-      audioEngine: get().audioEngine, // Preserve engine instance
+      audioEngine: get().audioEngine,
       isInitialized: get().isInitialized,
     });
-    
-    console.log('Store reset to initial state');
+
+    console.log('🔄 Store reset to initial state');
   },
 }));
 
@@ -228,6 +363,8 @@ export const useAudioStatus = () => {
     isPlaying: state.isPlaying,
     isInitialized: state.isInitialized,
     error: state.error,
+    dangerLevel: state.dangerLevel,
+    dangerLabel: state.dangerLabel,
   }));
 };
 
@@ -240,6 +377,8 @@ export const useSpaceWeatherData = () => {
     lastUpdate: state.lastUpdate,
     isLoading: state.isLoading,
     error: state.error,
+    dangerLevel: state.dangerLevel,
+    dangerLabel: state.dangerLabel,
   }));
 };
 
@@ -248,4 +387,11 @@ export const useSpaceWeatherData = () => {
  */
 export const useAudioParams = () => {
   return useAudioStore((state) => state.audioParams);
+};
+
+/**
+ * Hook to get signal lock state
+ */
+export const useSignalLock = () => {
+  return useAudioStore((state) => state.signalLock);
 };

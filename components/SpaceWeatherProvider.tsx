@@ -1,46 +1,16 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { useAudioStore } from '@/store/audioStore';
+import { useSpaceWeatherPolling } from '@/hooks/useSpaceWeather';
 
-const POLL_INTERVAL = 30000; // 30 seconds (matches server caching)
+const POLL_INTERVAL = 30000; // 30 seconds
 
 export function SpaceWeatherProvider({ children }: { children: React.ReactNode }) {
-    const { updateSpaceWeatherData, setLoading, setError } = useAudioStore();
-    const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch('/api/space-weather');
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch data: ${response.status}`);
-            }
-
-            const data = await response.json();
-            updateSpaceWeatherData(data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Space weather fetch error:', error);
-            setError(error instanceof Error ? error.message : 'Connection failed');
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        // Initial fetch
-        fetchData();
-
-        // Setup polling
-        pollTimerRef.current = setInterval(fetchData, POLL_INTERVAL);
-
-        return () => {
-            if (pollTimerRef.current) {
-                clearInterval(pollTimerRef.current);
-            }
-        };
-    }, []);
+    // useSpaceWeatherPolling handles fetching, store updates, and sonification mapping
+    // Note: Auto-polling disabled here to let HUD control the fetch cycle and avoid double-fetching
+    useSpaceWeatherPolling({
+        pollInterval: POLL_INTERVAL,
+        autoStart: false 
+    });
 
     return <>{children}</>;
 }

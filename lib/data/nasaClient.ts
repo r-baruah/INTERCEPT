@@ -167,14 +167,14 @@ async function fetchGeomagneticData(): Promise<GeomagneticData> {
 function generateSolarWind(): SolarWind {
   // Generate realistic solar wind with natural variation
   // Typical quiet sun: 400 km/s, active: 500-700 km/s
-  const baseSpeed = 400 + Math.random() * 150;
-  const speed = Math.round(baseSpeed);
+  const baseSpeed = 380 + Math.random() * 200;
+  const speed = Math.max(300, Math.round(baseSpeed));
   
   // Typical density: 5-10 particles/cm³
-  const density = Math.round((5 + Math.random() * 5) * 10) / 10;
+  const density = Math.max(1, Math.round((5 + Math.random() * 15) * 10) / 10);
   
   // Typical temperature: 100,000 - 200,000 K
-  const temperature = Math.round((100000 + Math.random() * 100000) / 1000) * 1000;
+  const temperature = Math.max(50000, Math.round((100000 + Math.random() * 150000) / 1000) * 1000);
   
   return {
     speed,
@@ -202,8 +202,8 @@ export async function fetchSpaceWeather(): Promise<SpaceWeatherData> {
     const solar_wind = generateSolarWind();
     
     // If we got at least some real data, return it
-    if (flares.length > 0) {
-      console.log(`Successfully fetched ${flares.length} solar flares from NASA`);
+    if (flares.length > 0 || geomagnetic.timestamp) {
+      console.log(`Successfully fetched live data. Flares: ${flares.length}, KP: ${geomagnetic.kp_index}`);
       return {
         timestamp: new Date().toISOString(),
         solar_wind,
