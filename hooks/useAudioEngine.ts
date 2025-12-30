@@ -37,10 +37,8 @@ export function useAudioEngine() {
   const initialize = useCallback(async () => {
     try {
       setError(null);
-      console.log('useAudioEngine: Initializing...');
       await audioEngine.initialize();
       setState(audioEngine.getState());
-      console.log('useAudioEngine: Initialized successfully');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to initialize audio';
       console.error('useAudioEngine: Initialization failed:', err);
@@ -54,7 +52,6 @@ export function useAudioEngine() {
   const play = useCallback(() => {
     try {
       setError(null);
-      console.log('useAudioEngine: Starting playback...');
       audioEngine.play();
       setState(audioEngine.getState());
     } catch (err) {
@@ -70,7 +67,6 @@ export function useAudioEngine() {
   const pause = useCallback(() => {
     try {
       setError(null);
-      console.log('useAudioEngine: Pausing (stopping)...');
       audioEngine.stop();
       setState(audioEngine.getState());
     } catch (err) {
@@ -86,7 +82,6 @@ export function useAudioEngine() {
   const stop = useCallback(() => {
     try {
       setError(null);
-      console.log('useAudioEngine: Stopping...');
       audioEngine.stop();
       setState(audioEngine.getState());
     } catch (err) {
@@ -123,7 +118,6 @@ export function useAudioEngine() {
    */
   useEffect(() => {
     return () => {
-      console.log('useAudioEngine: Component unmounting, stopping audio...');
       try {
         audioEngine.stop();
       } catch (err) {

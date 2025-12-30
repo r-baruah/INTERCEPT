@@ -51,8 +51,6 @@ export class BroadcastService {
             lastBroadcastAt: null,
             uptime: 0,
         };
-
-        console.log('BroadcastService initialized');
     }
 
     /**
@@ -336,7 +334,6 @@ export class BroadcastService {
      */
     updateConfig(config: Partial<BroadcastConfig>): void {
         this.config = { ...this.config, ...config };
-        console.log('BroadcastService config updated');
     }
 
     /**
@@ -344,7 +341,6 @@ export class BroadcastService {
      */
     clearHistory(): void {
         this.history = [];
-        console.log('Broadcast history cleared');
     }
 
     // Helper methods

@@ -2,139 +2,75 @@
 
 ## Introduction
 
-Cosmic Radio is a real-time space weather sonification platform that transforms invisible electromagnetic phenomena from our solar system into an immersive audio-visual experience. The system ingests live telemetry from NASA and NOAA sources, procedurally generating ambient soundscapes that respond to solar winds, geomagnetic storms, and cosmic events. Unlike passive dashboards, Cosmic Radio creates a "lean-back" broadcast experience where users passively absorb cosmic information through sound, interrupted only by AI-narrated alerts during significant space weather events.
+Cosmic Radio is a chill, ambient "Space Weather Radio" that transforms NASA space weather data into Lo-Fi music. The system creates a relaxing, educational experience where users can listen to the cosmos through procedurally generated soundscapes based on real solar wind data, geomagnetic activity, and cosmic events. The platform embodies a "Cassette Futurism" aesthetic - think retro space monitoring equipment that makes the universe sound beautiful.
 
 ## Glossary
 
-- **Cosmic_Radio_Platform**: The complete real-time space weather sonification system
-- **Audio_Engine**: Browser-based synthesizer using Tone.js for procedural sound generation
-- **AI_Operator**: Text-to-speech system that provides contextual narration during cosmic events
-- **Rack_Interface**: Cassette futurism-inspired UI resembling hardware equipment
-- **Tuner_Component**: Interactive frequency tuning mechanism requiring user maintenance
-- **Threat_Assessment_System**: Logic that translates raw space weather data into human-readable risk levels
-- **Data_Ingestion_Layer**: System that polls NASA DONKI, NOAA SWPC, and NASA NeoWs APIs
-- **Interference_Engine**: Audio processing system that simulates radio propagation effects
-- **Sentry_System**: Critical alert notification system with TTS announcements
-- **Simulation_Mode**: Developer/demo mode for injecting mock extreme weather scenarios
+- **Cosmic_Radio_Platform**: The complete space weather sonification system that turns NASA data into Lo-Fi music
+- **Audio_Engine**: Browser-based synthesizer using Tone.js for procedural ambient sound generation
+- **Space_Weather_Data**: Real-time data from NASA APIs including solar wind speed, geomagnetic activity, and solar flares
+- **Sonification_Engine**: System that maps space weather parameters to musical elements (BPM, frequency, effects)
+- **Retro_Interface**: Cassette futurism-inspired UI resembling vintage space monitoring equipment
+- **Data_Poller**: Service that fetches NASA space weather data at regular intervals
 
 ## Requirements
 
-### Requirement 1: Real-Time Data Integration
+### Requirement 1: NASA Data Integration
 
-**User Story:** As a space weather enthusiast, I want the platform to continuously monitor authoritative space weather sources, so that I receive the most current cosmic information through audio feedback.
-
-#### Acceptance Criteria
-
-1. WHEN the system starts, THE Data_Ingestion_Layer SHALL poll NASA DONKI API every 60 seconds for solar flare and geomagnetic storm data
-2. WHEN polling NOAA SWPC, THE Data_Ingestion_Layer SHALL retrieve radio blackout interference data within the same 60-second cycle
-3. WHEN accessing NASA NeoWs, THE Data_Ingestion_Layer SHALL monitor asteroid approach data and integrate it into the audio stream
-4. WHEN any API becomes unavailable, THE Data_Ingestion_Layer SHALL maintain system operation using cached data and log the outage
-5. WHEN data is successfully retrieved, THE Data_Ingestion_Layer SHALL validate the JSON structure before passing to audio processing
-
-### Requirement 2: Procedural Audio Generation
-
-**User Story:** As a user seeking ambient cosmic awareness, I want the platform to generate unique soundscapes based on real space weather conditions, so that I can passively understand cosmic activity through audio.
+**User Story:** As a space enthusiast, I want the platform to use real NASA space weather data, so that I can listen to authentic cosmic activity.
 
 #### Acceptance Criteria
 
-1. WHEN solar wind speed data is received, THE Audio_Engine SHALL adjust the base drone BPM proportionally to wind velocity in km/s
-2. WHEN Kp Index values indicate geomagnetic activity, THE Audio_Engine SHALL apply bit-crushing and distortion effects scaled to the index level
-3. WHEN particle density data exceeds baseline levels, THE Audio_Engine SHALL generate high-frequency shimmer textures
-4. WHEN multiple space weather conditions occur simultaneously, THE Audio_Engine SHALL layer all corresponding audio effects without clipping
-5. THE Audio_Engine SHALL maintain continuous audio output without gaps or interruptions during data transitions
+1. WHEN the system starts, THE Data_Poller SHALL fetch data from NASA DONKI API every 5 minutes
+2. WHEN NASA data is received, THE Data_Poller SHALL extract solar wind speed and geomagnetic Kp index values
+3. WHEN API calls fail, THE Data_Poller SHALL use the last successful data and continue operation
+4. WHEN data is successfully retrieved, THE Data_Poller SHALL validate the JSON structure before processing
+5. THE Data_Poller SHALL log all API interactions for debugging purposes
 
-### Requirement 3: AI Operator Narration
+### Requirement 2: Lo-Fi Audio Generation
 
-**User Story:** As a user monitoring space weather, I want an AI operator to provide contextual announcements during significant cosmic events, so that I understand the implications of current conditions.
-
-#### Acceptance Criteria
-
-1. WHEN solar flare class exceeds M2.0 threshold, THE AI_Operator SHALL generate contextual TTS announcement describing the event and potential impacts
-2. WHEN geomagnetic storm conditions reach G3 or higher, THE AI_Operator SHALL provide risk assessment narration
-3. WHEN multiple threshold events occur within 10 minutes, THE AI_Operator SHALL consolidate announcements to prevent audio spam
-4. WHEN generating TTS content, THE AI_Operator SHALL use technical but accessible language appropriate for space weather context
-5. WHEN TTS audio plays, THE AI_Operator SHALL duck background audio by 60% and restore levels after announcement completion
-
-### Requirement 4: Interactive Tuning Interface
-
-**User Story:** As a user engaging with the cosmic radio experience, I want to manually tune to the hydrogen line frequency, so that I feel actively connected to the cosmic monitoring process.
+**User Story:** As a user seeking ambient cosmic music, I want the platform to generate chill Lo-Fi sounds based on space weather, so that I can relax while learning about the cosmos.
 
 #### Acceptance Criteria
 
-1. WHEN the user interacts with the tuner, THE Tuner_Component SHALL provide inertial drag physics for realistic frequency adjustment
-2. WHEN the frequency approaches 1420 MHz, THE Tuner_Component SHALL implement magnetic locking to assist precise tuning
-3. WHEN left unattended, THE Tuner_Component SHALL introduce natural frequency drift over time to simulate entropy
-4. WHEN frequency drifts beyond acceptable range, THE Tuner_Component SHALL degrade audio quality until retuned
-5. WHEN successfully locked to 1420 MHz, THE Tuner_Component SHALL provide visual and audio feedback confirming optimal reception
+1. WHEN solar wind speed data is received, THE Audio_Engine SHALL adjust the base drone tempo proportionally
+2. WHEN Kp index indicates geomagnetic activity, THE Audio_Engine SHALL add subtle distortion and filtering effects
+3. WHEN space weather is calm, THE Audio_Engine SHALL generate peaceful ambient tones
+4. WHEN multiple conditions occur, THE Audio_Engine SHALL blend effects smoothly without harsh transitions
+5. THE Audio_Engine SHALL maintain continuous audio playback without gaps or interruptions
 
-### Requirement 5: Threat Level Assessment
+### Requirement 3: Retro Space Interface
 
-**User Story:** As a user concerned about space weather impacts, I want raw cosmic data translated into understandable risk levels, so that I can assess potential real-world consequences.
-
-#### Acceptance Criteria
-
-1. WHEN solar wind speed exceeds 600 km/s, THE Threat_Assessment_System SHALL display "STORM VELOCITY" red alert status
-2. WHEN Kp Index exceeds 6, THE Threat_Assessment_System SHALL trigger "BLACKOUT WARNING" with visual glitch effects
-3. WHEN solar flare X-class events occur, THE Threat_Assessment_System SHALL escalate to maximum threat level with appropriate visual indicators
-4. WHEN threat levels change, THE Threat_Assessment_System SHALL log the transition with timestamp and triggering data values
-5. THE Threat_Assessment_System SHALL maintain threat level history for the current session
-
-### Requirement 6: Interference Simulation
-
-**User Story:** As a user experiencing the cosmic radio simulation, I want audio effects that realistically represent how space weather affects radio propagation, so that I understand the physical impact of cosmic events.
+**User Story:** As a user interacting with the cosmic radio, I want a retro space monitoring interface, so that I feel like I'm operating authentic vintage equipment.
 
 #### Acceptance Criteria
 
-1. WHEN minor geomagnetic storms occur, THE Interference_Engine SHALL apply low-pass filtering to simulate high-frequency attenuation
-2. WHEN moderate storm conditions exist, THE Interference_Engine SHALL introduce pink noise to represent ionospheric disturbance
-3. WHEN severe blackout conditions are detected, THE Interference_Engine SHALL implement signal gating and aggressive bit-crushing
-4. WHEN interference conditions change, THE Interference_Engine SHALL transition effects smoothly over 2-3 seconds
-5. THE Interference_Engine SHALL preserve core audio elements even during maximum interference to maintain user engagement
+1. WHEN the interface loads, THE Retro_Interface SHALL display a cassette futurism design with monospace fonts
+2. WHEN showing space weather data, THE Retro_Interface SHALL use terminal-style green text on dark backgrounds
+3. WHEN users interact with controls, THE Retro_Interface SHALL provide subtle hover effects and transitions
+4. WHEN displaying current conditions, THE Retro_Interface SHALL show solar wind speed and geomagnetic activity levels
+5. THE Retro_Interface SHALL include basic audio controls (play/pause, volume) with retro styling
 
-### Requirement 7: Cassette Futurism Interface
+### Requirement 4: Educational Context
 
-**User Story:** As a user interacting with the cosmic radio platform, I want a hardware-inspired interface that feels like operating real space monitoring equipment, so that the experience feels authentic and immersive.
-
-#### Acceptance Criteria
-
-1. WHEN the interface loads, THE Rack_Interface SHALL display a CSS Grid layout resembling a server rack or avionics panel
-2. WHEN rendering visual elements, THE Rack_Interface SHALL apply CRT-style effects including scanlines, vignette, and subtle noise overlay
-3. WHEN displaying telemetry data, THE Rack_Interface SHALL use monospace fonts and terminal-style color schemes
-4. WHEN users interact with controls, THE Rack_Interface SHALL provide tactile feedback through CSS transitions and hover states
-5. THE Rack_Interface SHALL maintain responsive design principles while preserving the hardware aesthetic across device sizes
-
-### Requirement 8: Critical Alert System
-
-**User Story:** As a user monitoring space weather, I want immediate notification of critical cosmic events, so that I don't miss important space weather developments.
+**User Story:** As someone learning about space weather, I want to understand what the sounds represent, so that I can connect the music to real cosmic phenomena.
 
 #### Acceptance Criteria
 
-1. WHEN X-class solar flares are detected, THE Sentry_System SHALL display high-priority overlay notifications
-2. WHEN severe geomagnetic storms begin, THE Sentry_System SHALL trigger TTS announcements with technical details
-3. WHEN multiple critical events occur, THE Sentry_System SHALL queue notifications to prevent UI flooding
-4. WHEN displaying alerts, THE Sentry_System SHALL use transient toaster-style notifications that auto-dismiss after 10 seconds
-5. THE Sentry_System SHALL maintain an alert history log accessible through the interface
+1. WHEN space weather data changes, THE Cosmic_Radio_Platform SHALL display simple explanations of current conditions
+2. WHEN audio parameters change, THE Cosmic_Radio_Platform SHALL show which space weather factors are influencing the sound
+3. WHEN displaying data, THE Cosmic_Radio_Platform SHALL use accessible language that explains space weather concepts
+4. WHEN users first visit, THE Cosmic_Radio_Platform SHALL provide a brief explanation of how space weather becomes music
+5. THE Cosmic_Radio_Platform SHALL include links to NASA resources for users who want to learn more
 
-### Requirement 9: Simulation and Testing Mode
+### Requirement 5: Responsive Audio Controls
 
-**User Story:** As a developer or demonstrator, I want to inject mock extreme space weather scenarios, so that I can showcase the platform's capabilities without waiting for real cosmic events.
-
-#### Acceptance Criteria
-
-1. WHEN the key combination Ctrl+Shift+S is pressed, THE Simulation_Mode SHALL activate a hidden control panel
-2. WHEN simulation mode is active, THE Simulation_Mode SHALL allow injection of mock solar flare data with configurable intensity levels
-3. WHEN simulating Carrington Event scenarios, THE Simulation_Mode SHALL trigger maximum audio and visual effects
-4. WHEN simulation data is active, THE Simulation_Mode SHALL display clear indicators that the system is in demo mode
-5. WHEN exiting simulation mode, THE Simulation_Mode SHALL restore real-time data feeds and clear all mock data
-
-### Requirement 10: Enhanced Engagement Features
-
-**User Story:** As a platform user, I want features that make space weather data feel urgent and shareable, so that I remain engaged and can share interesting cosmic events with others.
+**User Story:** As a user controlling the cosmic radio experience, I want intuitive audio controls, so that I can customize my listening experience.
 
 #### Acceptance Criteria
 
-1. WHEN significant space weather events occur, THE Cosmic_Radio_Platform SHALL generate shareable "Cosmic Moment" snapshots with audio clips and visualizations
-2. WHEN threat levels reach critical status, THE Cosmic_Radio_Platform SHALL provide real-world impact predictions for infrastructure and technology
-3. WHEN users discover interesting cosmic patterns, THE Cosmic_Radio_Platform SHALL offer premium features like historical data analysis and custom alert thresholds
-4. WHEN space weather affects satellite communications, THE Cosmic_Radio_Platform SHALL display real-time impact maps showing affected regions
-5. THE Cosmic_Radio_Platform SHALL maintain user engagement metrics and provide personalized cosmic weather summaries
+1. WHEN users click play, THE Audio_Engine SHALL start generating audio based on current space weather data
+2. WHEN users adjust volume, THE Audio_Engine SHALL smoothly transition to the new level
+3. WHEN users pause, THE Audio_Engine SHALL stop audio generation and preserve the current state
+4. WHEN users resume, THE Audio_Engine SHALL continue with updated space weather data
+5. THE Audio_Engine SHALL provide visual feedback showing current audio activity and parameters

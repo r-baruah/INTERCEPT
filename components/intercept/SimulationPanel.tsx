@@ -92,8 +92,6 @@ export function SimulationPanel() {
         // 4. Update Audio Parameters
         const params = mapSpaceWeatherToAudio(mockData);
         updateAudioParams(params);
-
-        console.log(`[SIMULATION] Running scenario: ${scenario} (Kp=${mockData.geomagnetic.kp_index}, Wind=${mockData.solar_wind.speed})`);
     };
 
     if (!isVisible) return null;

@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         // Using Groq's mocked OpenAI-compatible endpoint or PlayAI integration if available
         // Based on user request to use "playai-tts" or "canopylabs/orpheus-v1-english"
 
-        // Note: As of December 2025, Groq has specific audio endpoints. 
+        // Note: As of late 2024, Groq has specific audio endpoints. 
         // We will try the standard speech endpoint structure.
 
         // Direct fetch to Groq's OpenAI-compatible audio endpoint

@@ -31,7 +31,6 @@ const broadcastService = getBroadcastService();
 eventDetector.addEventListener((event) => {
   // Broadcast detected events
   broadcastService.broadcastEvent(event);
-  console.log('Broadcast event detected:', event.type, event.description);
 });
 
 /**
@@ -63,10 +62,6 @@ function detectSignificantChanges(newData: SpaceWeatherData, oldData: SpaceWeath
   // Check for new flares
   const oldFlareIds = new Set(oldData.flares.map(f => f.id));
   const newFlares = newData.flares.filter(f => !oldFlareIds.has(f.id));
-  if (newFlares.length > 0) {
-    // EventDetector will handle significant flares, but log for tracking
-    console.log(`${newFlares.length} new flare(s) detected`);
-  }
 }
 
 /**
@@ -80,7 +75,6 @@ export async function GET() {
 
     // Return cached data if still valid
     if (cachedData && (now - cacheTimestamp) < CACHE_DURATION) {
-      console.log('Returning cached space weather data');
       return NextResponse.json({
         ...cachedData,
         data_source: 'cached',
@@ -96,7 +90,6 @@ export async function GET() {
     }
 
         // Fetch fresh data from NASA API
-        console.log('Fetching fresh space weather data...');
         let data;
         try {
             data = await fetchSpaceWeather();
@@ -119,9 +112,6 @@ export async function GET() {
         let events: any[] = [];
         try {
             events = eventDetector.analyzeData(data);
-            if (events.length > 0) {
-                console.log(`Detected ${events.length} space weather event(s)`);
-            }
         } catch (e) {
             console.error('Error analyzing events:', e);
         }

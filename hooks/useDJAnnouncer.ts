@@ -35,7 +35,6 @@ export function useDJAnnouncer() {
   useEffect(() => {
     if (!eventDetectorRef.current) {
       eventDetectorRef.current = new EventDetector();
-      console.log('🎙️ DJ Announcer: EventDetector initialized');
     }
   }, []);
 
@@ -48,7 +47,6 @@ export function useDJAnnouncer() {
   const announce = useCallback(async (event: AnySpaceWeatherEvent): Promise<DJScriptResponse | null> => {
     // Prevent duplicate announcements
     if (announcedEventsRef.current.has(event.id)) {
-      console.log('🎙️ DJ Announcer: Event already announced:', event.id);
       return null;
     }
 
@@ -78,8 +76,6 @@ export function useDJAnnouncer() {
       // Update state
       setCurrentAnnouncement(script);
       setAnnouncementHistory(prev => [script, ...prev].slice(0, 10)); // Keep last 10
-      
-      console.log('🎙️ The Operator:', script.script);
       
       return script;
     } catch (error) {
@@ -117,7 +113,6 @@ export function useDJAnnouncer() {
         
         if (unannounced.length > 0) {
           const mostSevere = unannounced[0];
-          console.log('🎙️ DJ Announcer: New event detected, announcing:', mostSevere.type);
           announce(mostSevere);
         }
       }
@@ -139,7 +134,6 @@ export function useDJAnnouncer() {
   const clearHistory = useCallback(() => {
     setAnnouncementHistory([]);
     announcedEventsRef.current.clear();
-    console.log('🎙️ DJ Announcer: History cleared');
   }, []);
 
   /**

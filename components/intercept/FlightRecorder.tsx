@@ -68,7 +68,6 @@ export function FlightRecorder({ canvasRef }: FlightRecorderProps) {
                             ...canvasStream.getVideoTracks(),
                             audioTrack
                         ]);
-                        console.log('[FlightRecorder] Audio track added successfully');
                     }
                 } catch (audioErr) {
                     console.warn('[FlightRecorder] Could not capture audio:', audioErr);
@@ -114,8 +113,6 @@ export function FlightRecorder({ canvasRef }: FlightRecorderProps) {
                 setCountdown(15);
                 setProgress(0);
                 setShowCompletionModal(true);
-
-                console.log('[FlightRecorder] Recording saved:', filename);
             };
 
             // 4. Start recording
@@ -147,8 +144,6 @@ export function FlightRecorder({ canvasRef }: FlightRecorderProps) {
                     }
                 }
             }, 100);
-
-            console.log('[FlightRecorder] Recording started');
 
         } catch (error) {
             console.error('[FlightRecorder] Failed to start recording:', error);

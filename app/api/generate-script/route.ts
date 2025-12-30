@@ -56,7 +56,6 @@ export async function POST(request: Request) {
     const cached = scriptCache.get(cacheKey);
     
     if (cached) {
-      console.log('🎙️ Returning cached script for event:', event.id);
       return NextResponse.json({
         script: cached.script,
         event_id: event.id,
@@ -82,8 +81,6 @@ export async function POST(request: Request) {
     // Build prompt based on event type
     const prompt = buildPrompt(event, currentData);
     const systemPrompt = getSystemPrompt();
-
-    console.log('🎙️ Generating script for event:', event.type, event.id);
 
     // Call Groq API
     const completion = await groq.chat.completions.create({
@@ -128,8 +125,6 @@ export async function POST(request: Request) {
       timestamp: new Date().toISOString(),
       character_count: truncatedScript.length
     };
-
-    console.log('🎙️ Script generated:', truncatedScript);
 
     return NextResponse.json(response);
 

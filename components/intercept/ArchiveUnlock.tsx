@@ -88,7 +88,6 @@ export function ArchiveUnlock() {
         updateAudioParams(params);
 
         setIsActivated(true);
-        console.log('[Archive] Halloween 2003 simulation activated');
     };
 
     return (

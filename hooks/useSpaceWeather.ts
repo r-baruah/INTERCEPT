@@ -87,7 +87,6 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
     // we pause polling to avoid overwriting their injected data.
     // Unless the hook itself was instantiated with demoMode=true (legacy behavior)
     if (isDemoMode && !demoMode) {
-      console.log('[useSpaceWeatherPolling] Polling paused due to active Simulation/Demo Mode');
       return;
     }
 
@@ -98,8 +97,6 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
       const url = (demoMode || isDemoMode)
         ? '/api/space-weather?demo=true'
         : '/api/space-weather';
-
-      console.log(`[useSpaceWeatherPolling] Fetching from: ${url}`);
 
       // Client-side timeout
       const controller = new AbortController();
@@ -118,7 +115,6 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
 
         // Even if unmounted, we log. But only update state if mounted (mostly)
         // CRITICAL FIX: Always update store, even if unmounted. Store is global.
-        console.log('[useSpaceWeatherPolling] Data received');
         updateSpaceWeatherData(data);
         updateAudioParams(mapSpaceWeatherToAudio(data));
         retryCountRef.current = 0;
@@ -185,8 +181,6 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
     intervalRef.current = setInterval(() => {
       fetchData();
     }, pollInterval);
-
-    console.log(`Polling started with ${pollInterval}ms interval`);
   }, [fetchData, pollInterval]);
 
   /**
@@ -196,7 +190,6 @@ export function useSpaceWeatherPolling(options: UseSpaceWeatherOptions = {}) {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
-      console.log('Polling stopped');
     }
   }, []);
 

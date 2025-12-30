@@ -89,7 +89,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       const { audioEngine, isInitialized } = get();
 
       if (isInitialized && audioEngine) {
-        console.log('AudioEngine already initialized');
         return;
       }
 
@@ -101,8 +100,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
         isInitialized: true,
         error: null,
       });
-
-      console.log('✅ AudioStore: Heliospheric Audio Engine initialized');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize audio engine';
       console.error('AudioEngine initialization error:', error);
@@ -138,11 +135,9 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       if (isPlaying) {
         audioEngine.stop();
         set({ isPlaying: false });
-        console.log('⏹️ Playback stopped');
       } else {
         audioEngine.play();
         set({ isPlaying: true, error: null });
-        console.log('▶️ Playback started');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Playback error';
@@ -186,8 +181,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
         intensity: audioParams.intensity,
       });
     }
-
-    console.log(`📡 Telemetry updated: Wind=${data.solar_wind.speed}km/s, Kp=${data.geomagnetic.kp_index}, Danger=${dangerLabel}`);
   },
 
   /**
@@ -225,8 +218,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
         intensity: audioParams.intensity,
       });
     }
-
-    console.log(`🔧 SIMULATION: Wind=${data.solar_wind.speed}km/s, Kp=${data.geomagnetic.kp_index}, Danger=${dangerLabel}`);
   },
 
   /**
@@ -246,8 +237,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
           volumeBoost: params.volumeBoost,
           intensity: params.intensity,
         });
-
-        console.log('🎛️ Audio parameters applied:', params);
       } catch (error) {
         console.error('Failed to apply audio parameters:', error);
       }
@@ -320,7 +309,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
    */
   setDemoMode: (enabled: boolean) => {
     set({ isDemoMode: enabled });
-    console.log(`🎮 Demo mode ${enabled ? 'enabled' : 'disabled'}`);
   },
 
   /**
@@ -328,7 +316,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
    */
   setMarsMode: (enabled: boolean) => {
     set({ isMarsMode: enabled });
-    console.log(`🔴 Mars mode ${enabled ? 'enabled' : 'disabled'}`);
   },
 
   /**
@@ -350,8 +337,6 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       audioEngine: get().audioEngine,
       isInitialized: get().isInitialized,
     });
-
-    console.log('🔄 Store reset to initial state');
   },
 }));
 

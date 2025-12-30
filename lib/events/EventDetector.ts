@@ -53,7 +53,6 @@ export class EventDetector {
 
   constructor(config: Partial<EventDetectionConfig> = {}) {
     this.config = { ...DEFAULT_EVENT_CONFIG, ...config };
-    console.log('EventDetector initialized with config:', this.config);
   }
 
   /**
@@ -289,7 +288,6 @@ export class EventDetector {
    * Notify all listeners of a new event
    */
   private notifyListeners(event: AnySpaceWeatherEvent): void {
-    console.log('Event detected:', event.type, event.description);
     this.listeners.forEach(listener => {
       try {
         listener(event);
@@ -342,7 +340,6 @@ export class EventDetector {
   clearHistory(): void {
     this.eventHistory = [];
     this.detectedFlareIds.clear();
-    console.log('Event history cleared');
   }
 
   /**
@@ -350,7 +347,6 @@ export class EventDetector {
    */
   updateConfig(config: Partial<EventDetectionConfig>): void {
     this.config = { ...this.config, ...config };
-    console.log('EventDetector config updated:', this.config);
   }
 
   /**

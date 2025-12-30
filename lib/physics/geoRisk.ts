@@ -27,8 +27,8 @@ export interface GeoRiskResult {
  * @returns Risk assessment with status, label, and color
  */
 export function calculateGeoRisk(userLat: number, kpIndex: number): GeoRiskResult {
-    // Simplify: assume magnetic latitude ≈ geographic latitude for hackathon
-    // (In reality, magnetic poles are offset ~10-15° from geographic poles)
+    // Approximation: Geographic latitude used as proxy for magnetic latitude 
+    // due to localized computation constraints. Variance ~10-15°.
     const magneticLat = Math.abs(userLat);
 
     // NOAA Auroral Oval Approximation Formula
