@@ -1,0 +1,337 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   INTERCEPT - Design System
+   "Invisible Tech. If the user notices the interface, we have failed."
+   ============================================================================ */
+
+:root {
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', monospace;
+  
+  /* The Void */
+  --color-void: #000000;
+  --color-void-soft: #0a0a0a;
+  
+  /* Signal Colors - Enhanced */
+  --color-signal-locked: #ffffff;
+  --color-signal-searching: #a1a1aa; /* Upgraded from 3f3f46 */
+  
+  /* Storm Spectrum (Blue → Amber) */
+  --color-calm: hsl(200, 70%, 50%);
+  --color-storm: hsl(30, 90%, 50%);
+  
+  /* Status - Brighter for visibility */
+  --color-nominal: #34d399;   /* emerald-400 */
+  --color-warning: #fbbf24;   /* amber-400 */
+  --color-critical: #f87171;  /* red-400 */
+  
+  /* Text Hierarchy - ENHANCED for visibility */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a1a1aa; /* zinc-400 - was zinc-600 */
+  --color-text-muted: #71717a;     /* zinc-500 - was zinc-700 */
+}
+
+/* ============================================================================
+   Base Reset
+   ============================================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-void);
+  color: var(--color-text-primary);
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================================
+   Typography - Stark. Functional. Beautiful.
+   ============================================================================ */
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Data Display - Fighter Jet HUD Style */
+.data-value {
+  @apply font-mono tracking-tight;
+  text-shadow: 0 0 20px currentColor;
+}
+
+.shadow-glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.data-label {
+  @apply font-mono text-[10px] tracking-[0.3em] uppercase;
+  color: var(--color-text-muted);
+}
+
+/* ============================================================================
+   The Ring - Glow Effects
+   ============================================================================ */
+
+.ring-glow-calm {
+  box-shadow: 
+    0 0 60px hsla(200, 70%, 50%, 0.3),
+    0 0 120px hsla(200, 70%, 50%, 0.1);
+}
+
+.ring-glow-storm {
+  box-shadow: 
+    0 0 60px hsla(30, 90%, 50%, 0.4),
+    0 0 120px hsla(30, 90%, 50%, 0.2);
+}
+
+/* ============================================================================
+   Animations - Minimal, Purposeful
+   ============================================================================ */
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+  51% { opacity: 1; }
+  52% { opacity: 0.6; }
+  53% { opacity: 1; }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.animate-flicker {
+  animation: flicker 0.15s ease-in-out;
+}
+
+/* ============================================================================
+   Tuner - Heavy, Precise Instrument Feel
+   ============================================================================ */
+
+.tuner-track {
+  @apply relative h-1 bg-zinc-900 rounded-full;
+}
+
+.tuner-knob {
+  @apply absolute top-1/2 -translate-y-1/2 -translate-x-1/2;
+  @apply w-6 h-12 rounded-sm cursor-ew-resize;
+  background: linear-gradient(180deg, #666 0%, #333 100%);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  transition: transform 0.1s ease, box-shadow 0.3s ease;
+}
+
+.tuner-knob.locked {
+  background: linear-gradient(180deg, #fff 0%, #ccc 100%);
+  box-shadow: 0 0 20px rgba(255,255,255,0.5), 0 4px 8px rgba(0,0,0,0.5);
+}
+
+.tuner-knob:active {
+  transform: translateY(-50%) translateX(-50%) scale(1.1);
+}
+
+/* ============================================================================
+   Signal Strength Meter
+   ============================================================================ */
+
+.signal-bar {
+  @apply flex-1 rounded-sm transition-all duration-150;
+  background-color: var(--color-void-soft);
+}
+
+.signal-bar.active {
+  background-color: var(--color-nominal);
+}
+
+.signal-bar.warning {
+  background-color: var(--color-warning);
+}
+
+.signal-bar.weak {
+  background-color: var(--color-critical);
+}
+
+/* ============================================================================
+   Sentry Message Card
+   ============================================================================ */
+
+.sentry-message {
+  @apply px-6 py-3 backdrop-blur-sm border rounded-sm;
+  @apply font-mono text-sm tracking-wider uppercase;
+}
+
+.sentry-message.info {
+  @apply bg-white/5 border-white/20 text-white/80;
+}
+
+.sentry-message.warning {
+  @apply bg-amber-500/10 border-amber-500/50 text-amber-400;
+}
+
+.sentry-message.critical {
+  @apply bg-red-500/10 border-red-500/50 text-red-400;
+}
+
+/* ============================================================================
+   Logbook Panel
+   ============================================================================ */
+
+.logbook-panel {
+  @apply fixed inset-y-0 right-0 w-full max-w-md z-40;
+  @apply bg-black/95 border-l border-zinc-800 overflow-hidden;
+}
+
+.logbook-entry {
+  @apply bg-zinc-900/50 border border-zinc-800 p-4 rounded-sm;
+  @apply hover:border-zinc-700 transition-colors;
+}
+
+/* ============================================================================
+   Button Styles - Instrument Controls
+   ============================================================================ */
+
+.btn-acquire {
+  @apply px-6 py-3 font-mono text-sm tracking-widest uppercase;
+  @apply transition-all duration-300;
+}
+
+.btn-acquire:disabled {
+  @apply bg-zinc-900 text-zinc-600 cursor-not-allowed;
+}
+
+.btn-acquire:not(:disabled) {
+  @apply bg-white/10 text-white border border-white/30;
+  @apply hover:bg-white/20;
+}
+
+.btn-acquire.active {
+  @apply bg-white text-black;
+}
+
+/* ============================================================================
+   Scrollbar - Invisible or Minimal
+   ============================================================================ */
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* ============================================================================
+   Utility Classes
+   ============================================================================ */
+
+.glass {
+  @apply backdrop-blur-sm bg-white/5 border border-white/10;
+}
+
+.text-gradient {
+  background: linear-gradient(180deg, #fff 0%, #888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Selection */
+::selection {
+  background-color: white;
+  color: black;
+}
+
+/* Focus States - Subtle */
+:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Noise Texture Overlay
+   ============================================================================ */
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  mix-blend-mode: overlay;
+}
+
+/* ============================================================================
+   Responsive Adjustments
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  .data-value {
+    @apply text-2xl;
+  }
+  
+  .data-label {
+    @apply text-[8px] tracking-[0.2em];
+  }
+}
