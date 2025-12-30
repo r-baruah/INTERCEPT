@@ -1,3 +1,0 @@
-- [x] Connect NASA API
-- [ ] Build the UI
-- [ ] Fix audio glitches
