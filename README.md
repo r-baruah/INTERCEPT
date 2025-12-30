@@ -113,7 +113,7 @@ graph TD
 ---
 
 ### 📂 Project Evolution
-*   [View Architectural Evidence](./kiro/README.md) - Documentation regarding the transition from concept to risk engine.
+*   [View Architectural Evidence](./kiro) - Documentation regarding the transition from concept to risk engine.
 
 ---
 
